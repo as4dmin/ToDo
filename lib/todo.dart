@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/AppProvider.dart';
+import 'package:provider/provider.dart';
 
 class TODO extends StatefulWidget {
   const TODO({super.key});
@@ -27,20 +29,24 @@ class _TODOState extends State<TODO> {
       appBar: AppBar(
         title: Text("TODO"),
       ),
-      body: MyTodo.todos.isEmpty? 
-      Center(child:  Text("Nothing to do")) : 
-      ListView.builder(
+      body: Consumer<AppProvider>(
+        builder: (context, MyTodo, child) {
+        if(MyTodo.todos.isEmpty){
+        return const Center(child:  Text("Nothing to do")); 
+      }else{
+        return ListView.builder(
         itemCount: MyTodo.todos.length,
         itemBuilder: (context,index){
           final todo = MyTodo.todos[index];
           return TodoItem(
             todo: todo, 
             onChanged: (value){
-              setState(() {
-                MyTodo.todos[index].complete = value;
-              });
+              MyTodo.updateTodo(value,index);
             });
-        })
+        }
+        );
+      }
+        },)
     );
   }
 
@@ -124,11 +130,9 @@ class _TODOState extends State<TODO> {
       priority: priority,
     );
 
-    MyTodo.todos.add(todo);
+    Provider.of<AppProvider>(context, listen: false).addTodo(todo);
     _controller.clear();
-    setState(() {
       Navigator.pop(context);
-    });
 
   }
 
